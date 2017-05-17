@@ -1,8 +1,7 @@
 <?php
-defined( 'ABSPATH' ) or die( 'Cheatin\' uh?' );
+defined( 'ABSPATH' ) or die( 'Cheatin&#8217; uh?' );
 
 if ( class_exists( 'WPaaS\Plugin' ) ) :
-
 	add_filter( 'rocket_display_varnish_options_tab', '__return_false' );
 	add_filter( 'set_rocket_wp_cache_define', '__return_true' );
 
@@ -59,7 +58,7 @@ HTACCESS;
 
 		return $rules;
 	}
-	add_filter('rocket_htaccess_mod_expires', 'rocket_remove_html_expire_goddady');
+	add_filter( 'rocket_htaccess_mod_expires', 'rocket_remove_html_expire_goddady' );
 
 	/**
 	 * Call the Varnish server to purge the cache with GoDaddy.
@@ -92,6 +91,33 @@ HTACCESS;
 	 *
 	 * @return void
 	 */
+	function rocket_clean_domain_godaddy() {
+		rocket_godaddy_request( 'BAN' );
+	}
+	add_action( 'before_rocket_clean_domain', 'rocket_clean_domain_godaddy' );
+
+	/**
+	 * Call the Varnish server to purge a specific URL with GoDaddy.
+	 *
+	 * @since 2.9.5
+	 *
+	 * @param string $url URL to purge.
+	 * @return void
+	 */
+	function rocket_clean_file_godaddy( $url ) {
+		rocket_godaddy_request( 'PURGE', home_url( $url ) );
+	}
+	add_action( 'before_rocket_clean_file', 'rocket_clean_file_godaddy' );
+
+	/**
+	 * Call the Varnish server to purge the home with GoDaddy.
+	 *
+	 * @since 2.9.5
+	 *
+	 * @param string $root root URL.
+	 * @param string $lang language code.
+	 * @return void
+	 */
 	function rocket_clean_home_godaddy( $root, $lang ) {
 		$home_url = trailingslashit( get_rocket_i18n_home_url( $lang ) );
 		$home_pagination_url = $home_url . trailingslashit( $GLOBALS['wp_rewrite']->pagination_base );
@@ -118,7 +144,7 @@ HTACCESS;
 
 		wp_cache_flush();
 
-		// This forces the APC cache to flush across the server
+		// This forces the APC cache to flush across the server.
 		update_option( 'gd_system_last_cache_flush', time() );
 
 		wp_remote_request(
@@ -132,5 +158,4 @@ HTACCESS;
 			)
 		);
 	}
-
 endif;
